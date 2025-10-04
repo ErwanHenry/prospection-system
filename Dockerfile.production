@@ -1,0 +1,91 @@
+# Dockerfile Production - Graixl Prospection System
+FROM node:18-alpine AS builder
+
+# Métadonnées
+LABEL maintainer="Graixl Team"
+LABEL version="1.0.0"
+LABEL description="Graixl Prospection System - Multi-Agent AI Platform"
+
+# Variables d'environnement de build
+ENV NODE_ENV=production
+ENV NPM_CONFIG_LOGLEVEL=warn
+ENV NPM_CONFIG_PROGRESS=false
+
+# Répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Installer les dépendances
+RUN npm ci --only=production --silent && \
+    npm cache clean --force
+
+# Copier le code source
+COPY . .
+
+# Créer un utilisateur non-root
+RUN addgroup -g 1001 -S graixl && \
+    adduser -S graixl -u 1001
+
+# Installer des outils système nécessaires
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Variables d'environnement pour Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/logs /app/data /app/temp /app/uploads && \
+    chown -R graixl:graixl /app
+
+# Optimiser les permissions
+RUN chmod +x /app/api/server.js
+
+# Health check script
+COPY docker/healthcheck.js /app/healthcheck.js
+RUN chmod +x /app/healthcheck.js
+
+# Stage final
+FROM node:18-alpine
+
+# Copier depuis le builder
+COPY --from=builder /app /app
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+# Installer curl pour health check
+RUN apk add --no-cache curl chromium
+
+# Variables d'environnement de production
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV TZ=Europe/Paris
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Répertoire de travail
+WORKDIR /app
+
+# Passer à l'utilisateur non-root
+USER graixl
+
+# Exposer le port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node healthcheck.js
+
+# Point d'entrée avec gestion gracieuse des signaux
+CMD ["node", "api/server.js"]

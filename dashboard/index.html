@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graixl - Dashboard de Prospection</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-rocket"></i>
+                    <h1>Graixl</h1>
+                    <span class="subtitle">Prospection Intelligente</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openNewProspectModal()">
+                        <i class="fas fa-plus"></i> Nouveau Prospect
+                    </button>
+                    <button class="btn btn-secondary" onclick="openCampaignModal()">
+                        <i class="fas fa-rocket"></i> Lancer Campagne
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Stats Dashboard -->
+            <section class="stats-section">
+                <h2><i class="fas fa-chart-line"></i> Statistiques en Temps Réel</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon prospects">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="prospects-count">0</h3>
+                            <p>Prospects Analysés</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon emails">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="emails-count">0</h3>
+                            <p>Emails Générés</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon sent">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="sent-count">0</h3>
+                            <p>Emails Envoyés</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="success-rate">0%</h3>
+                            <p>Taux de Succès</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="actions-section">
+                <h2><i class="fas fa-bolt"></i> Actions Rapides</h2>
+                <div class="actions-grid">
+                    <div class="action-card" onclick="openNewProspectModal()">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Analyser un Prospect</h3>
+                        <p>Analyse complète d'un prospect avec 7 agents IA</p>
+                    </div>
+                    <div class="action-card" onclick="openLinkedInImportModal()">
+                        <i class="fab fa-linkedin"></i>
+                        <h3>Import LinkedIn/Apollo</h3>
+                        <p>Import automatique depuis LinkedIn + Apollo</p>
+                    </div>
+                    <div class="action-card" onclick="openCampaignModal()">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Campagne Auto</h3>
+                        <p>Lancer une campagne automatisée complète</p>
+                    </div>
+                    <div class="action-card" onclick="showMetrics()">
+                        <i class="fas fa-analytics"></i>
+                        <h3>Analytics</h3>
+                        <p>Voir les performances détaillées</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="activity-section">
+                <h2><i class="fas fa-clock"></i> Activité Récente</h2>
+                <div class="activity-feed" id="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>Système Graixl initialisé avec 7 agents IA</p>
+                            <span class="activity-time">Il y a quelques secondes</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modals -->
+        <!-- Modal Nouveau Prospect -->
+        <div id="new-prospect-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user-plus"></i> Analyser un Nouveau Prospect</h2>
+                    <span class="close" onclick="closeModal('new-prospect-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="prospect-form">
+                        <div class="form-group">
+                            <label for="prospect-email">Email *</label>
+                            <input type="email" id="prospect-email" name="email" required 
+                                   placeholder="prospect@entreprise.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="prospect-name">Nom complet</label>
+                            <input type="text" id="prospect-name" name="name" 
+                                   placeholder="Jean Dupont">
+                        </div>
+                        <div class="form-group">
+                            <label for="prospect-company">Entreprise</label>
+                            <input type="text" id="prospect-company" name="company" 
+                                   placeholder="TechCorp">
+                        </div>
+                        <div class="form-group">
+                            <label for="prospect-title">Titre/Poste</label>
+                            <input type="text" id="prospect-title" name="title" 
+                                   placeholder="CEO, Directeur Commercial">
+                        </div>
+                        <div class="form-group">
+                            <label for="prospect-industry">Industrie</label>
+                            <select id="prospect-industry" name="industry">
+                                <option value="">Sélectionner...</option>
+                                <option value="tech">Technologie</option>
+                                <option value="finance">Finance</option>
+                                <option value="healthcare">Santé</option>
+                                <option value="retail">Commerce</option>
+                                <option value="consulting">Conseil</option>
+                                <option value="manufacturing">Industrie</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prospect-linkedin">LinkedIn (optionnel)</label>
+                            <input type="url" id="prospect-linkedin" name="linkedinUrl" 
+                                   placeholder="https://linkedin.com/in/...">
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('new-prospect-modal')">
+                                Annuler
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Analyser avec IA
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Résultats -->
+        <div id="results-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-pie"></i> Résultats de l'Analyse</h2>
+                    <span class="close" onclick="closeModal('results-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="results-content">
+                        <!-- Contenu généré dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Import LinkedIn/Apollo -->
+        <div id="linkedin-import-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2><i class="fab fa-linkedin"></i> Import LinkedIn/Apollo</h2>
+                    <span class="close" onclick="closeModal('linkedin-import-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="linkedin-import-form">
+                        <div class="form-group">
+                            <label for="import-keywords">Mots-clés de recherche *</label>
+                            <input type="text" id="import-keywords" name="keywords" required
+                                   placeholder="CEO, CTO, Sales Director...">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="import-titles">Titres (optionnel)</label>
+                                <input type="text" id="import-titles" name="titles"
+                                       placeholder="CEO, CTO, VP Sales...">
+                            </div>
+                            <div class="form-group">
+                                <label for="import-locations">Localisation</label>
+                                <input type="text" id="import-locations" name="locations"
+                                       placeholder="Paris, Lyon, France...">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="import-source">Source de données</label>
+                            <select id="import-source" name="source">
+                                <option value="hybrid">Hybride (LinkedIn + Apollo)</option>
+                                <option value="apollo">Apollo.io uniquement</option>
+                                <option value="linkedin">LinkedIn uniquement</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('linkedin-import-modal')">
+                                Annuler
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fab fa-linkedin"></i> Importer Prospects
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Campagne -->
+        <div id="campaign-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-rocket"></i> Lancer une Campagne</h2>
+                    <span class="close" onclick="closeModal('campaign-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="campaign-options">
+                        <div class="option-card" onclick="selectCampaignType('single')">
+                            <i class="fas fa-user"></i>
+                            <h3>Prospect Unique</h3>
+                            <p>Traitement complet d'un seul prospect</p>
+                        </div>
+                        <div class="option-card" onclick="selectCampaignType('bulk')">
+                            <i class="fas fa-users"></i>
+                            <h3>Campagne de Masse</h3>
+                            <p>Traitement automatisé de plusieurs prospects</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="loading-spinner">
+                    <i class="fas fa-cog fa-spin"></i>
+                </div>
+                <h3>Agents IA en action...</h3>
+                <p id="loading-message">Initialisation des agents spécialisés</p>
+                <div class="loading-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

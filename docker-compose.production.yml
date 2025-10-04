@@ -1,0 +1,214 @@
+# Docker Compose Production - Graixl Prospection System
+version: '3.8'
+
+services:
+  # Application Graixl
+  graixl-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: graixl-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mongodb://graixl-mongo:27017/graixl_production
+      - REDIS_URL=redis://graixl-redis:6379
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    depends_on:
+      - graixl-mongo
+      - graixl-redis
+    networks:
+      - graixl-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.graixl.rule=Host(`graixl.yourdomain.com`)"
+      - "traefik.http.routers.graixl.entrypoints=websecure"
+      - "traefik.http.routers.graixl.tls.certresolver=letsencrypt"
+      - "traefik.http.services.graixl.loadbalancer.server.port=3000"
+
+  # Base de données MongoDB
+  graixl-mongo:
+    image: mongo:6.0
+    container_name: graixl-mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-graixladmin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=graixl_production
+    volumes:
+      - graixl_mongo_data:/data/db
+      - ./docker/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./backups:/backups
+    networks:
+      - graixl-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Cache Redis
+  graixl-redis:
+    image: redis:7-alpine
+    container_name: graixl-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - graixl_redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - graixl-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Reverse Proxy Traefik
+  graixl-traefik:
+    image: traefik:v3.0
+    container_name: graixl-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard (à protéger en production)
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"  # Sécurisé en production
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/traefik/acme.json:/acme.json
+      - ./docker/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    networks:
+      - graixl-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.yourdomain.com`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  # Monitoring - Prometheus
+  graixl-prometheus:
+    image: prom/prometheus:latest
+    container_name: graixl-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - graixl_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - graixl-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`monitoring.yourdomain.com`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+
+  # Visualisation - Grafana
+  graixl-grafana:
+    image: grafana/grafana:latest
+    container_name: graixl-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://dashboard.yourdomain.com
+      - GF_SECURITY_COOKIE_SECURE=true
+    volumes:
+      - graixl_grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - graixl-network
+    depends_on:
+      - graixl-prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`dashboard.yourdomain.com`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+
+  # Collecteur de métriques
+  graixl-node-exporter:
+    image: prom/node-exporter:latest
+    container_name: graixl-node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - graixl-network
+
+  # Backup automatique
+  graixl-backup:
+    image: mongo:6.0
+    container_name: graixl-backup
+    restart: "no"
+    volumes:
+      - ./backups:/backups
+      - ./docker/backup/backup.sh:/backup.sh:ro
+    command: /bin/bash /backup.sh
+    networks:
+      - graixl-network
+    depends_on:
+      - graixl-mongo
+    profiles:
+      - backup
+
+# Volumes persistants
+volumes:
+  graixl_mongo_data:
+    driver: local
+  graixl_redis_data:
+    driver: local
+  graixl_prometheus_data:
+    driver: local
+  graixl_grafana_data:
+    driver: local
+
+# Réseau interne
+networks:
+  graixl-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

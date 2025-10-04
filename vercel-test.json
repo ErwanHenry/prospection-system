@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/simple-index.js"
+    }
+  ],
+  "functions": {
+    "api/simple-index.js": {
+      "maxDuration": 10
+    }
+  }
+}

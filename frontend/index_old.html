@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Système de Prospection Automatisé</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Système de Prospection Automatisé</h1>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Prospects</h3>
+                    <p id="totalProspects">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Contactés</h3>
+                    <p id="contacted">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Réponses</h3>
+                    <p id="responses">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Taux de réponse</h3>
+                    <p id="responseRate">0%</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="add-prospect">
+                <h2>➕ Ajouter un prospect</h2>
+                <form id="prospectForm">
+                    <div class="form-row">
+                        <input type="text" id="firstName" placeholder="Prénom" required>
+                        <input type="text" id="lastName" placeholder="Nom" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="company" placeholder="Entreprise" required>
+                        <input type="text" id="position" placeholder="Poste" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="url" id="linkedinUrl" placeholder="URL LinkedIn" required>
+                        <input type="email" id="email" placeholder="Email (optionnel)">
+                    </div>
+                    <button type="submit">Ajouter le prospect</button>
+                </form>
+            </section>
+
+            <section class="prospects-list">
+                <h2>📋 Liste des prospects</h2>
+                <div class="search-box">
+                    <input type="text" id="searchProspects" placeholder="Rechercher un prospect..." oninput="filterProspects()">
+                </div>
+                <div id="prospectsTable">
+                    <p>Chargement des prospects...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

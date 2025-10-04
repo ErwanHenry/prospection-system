@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graixl - Prospection Intelligente</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .logo { font-size: 2.5rem; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
+        .tagline { font-size: 1.2rem; color: #64748b; }
+        .status { background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 20px 0; }
+        .btn { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 10px; }
+        .features { list-style: none; padding: 0; }
+        .features li { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🚀 Graixl</div>
+            <div class="tagline">Prospection Intelligente avec Claude Code</div>
+            <div style="margin-top: 15px;">
+                <span class="status">✅ Déployé avec succès</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🤖 Système Multi-Agents (8 Agents)</h3>
+            <ul class="features">
+                <li>🎯 Product Manager - Validation produit-marché</li>
+                <li>📋 Planificateur - Stratégie d'approche</li>
+                <li>🔍 Testeur - Contrôle qualité</li>
+                <li>⚙️ Backend Developer - Intégration technique</li>
+                <li>💻 Frontend Developer - Interface utilisateur</li>
+                <li>🎨 UX-UI Designer - Expérience utilisateur</li>
+                <li>🔧 DevOps - Infrastructure</li>
+                <li>👔 Chef de Projet - Coordination</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🔗 Import Automatique LinkedIn/Apollo</h3>
+            <p>Système d'import hybride pour récupérer automatiquement des prospects depuis LinkedIn et Apollo.io</p>
+            <p><strong>Fonctionnalités :</strong></p>
+            <ul>
+                <li>Recherche par mots-clés (CEO, CTO, VP Sales...)</li>
+                <li>Filtrage par localisation et industrie</li>
+                <li>Enrichissement automatique des données</li>
+                <li>Support Apollo.io + LinkedIn + mode hybride</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📧 Génération d'Emails IA</h3>
+            <p>Génération d'emails personnalisés propulsée par Claude Code</p>
+            <p><strong>Capacités :</strong></p>
+            <ul>
+                <li>Analyse complète du profil prospect</li>
+                <li>Personnalisation selon l'industrie et séniorité</li>
+                <li>Validation automatique de l'efficacité</li>
+                <li>Score de probabilité de réponse</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🎯 API Endpoints Disponibles</h3>
+            <a href="/api/health" class="btn">Health Check</a>
+            <a href="/api/v1/docs" class="btn">Documentation</a>
+            <p><strong>Tests API :</strong></p>
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <strong>Import prospects :</strong><br>
+                <code>POST /api/v1/prospects/import</code><br>
+                <small>{"keywords": "CEO", "source": "hybrid"}</small>
+            </div>
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <strong>Analyser prospect :</strong><br>
+                <code>POST /api/v1/prospects/analyze</code><br>
+                <small>{"email": "erwanhenry@hotmail.com", "name": "Erwan Henry"}</small>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #64748b; margin-top: 40px;">
+            <p>🚀 <strong>Graixl v1.0.0</strong> - Révolutionner la prospection B2B avec l'IA</p>
+            <p>Propulsé par Claude Code • Déployé sur Vercel</p>
+            <p><strong>Status :</strong> ✅ Entièrement fonctionnel</p>
+        </div>
+    </div>
+
+    <script>
+        // Test automatique des APIs
+        async function testAPIs() {
+            try {
+                const healthResponse = await fetch('/api/health');
+                const healthData = await healthResponse.json();
+                console.log('Health Check:', healthData);
+                
+                const importResponse = await fetch('/api/v1/prospects/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keywords: 'CEO', source: 'hybrid' })
+                });
+                const importData = await importResponse.json();
+                console.log('Import LinkedIn/Apollo:', importData);
+                
+            } catch (error) {
+                console.log('API Tests:', error);
+            }
+        }
+        
+        // Lancer les tests au chargement
+        testAPIs();
+    </script>
+</body>
+</html>

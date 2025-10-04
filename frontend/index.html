@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn to CRM - Prospection System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="update-all-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 LinkedIn to CRM System</h1>
+            <div class="status-bar">
+                <span class="status-item" id="google-status">
+                    <span class="status-dot" id="google-dot"></span>
+                    Google Sheets: <span id="google-text">Checking...</span>
+                </span>
+                <span class="status-item" id="linkedin-status">
+                    <span class="status-dot" id="linkedin-dot"></span>
+                    LinkedIn: <span id="linkedin-text">Checking...</span>
+                </span>
+                <button id="refreshHealth" class="btn-refresh">🔄 Refresh</button>
+            </div>
+            <div id="status" class="status"></div>
+        </header>
+
+        <main>
+            <!-- System Health Section -->
+            <section class="card">
+                <h2>🏥 System Health</h2>
+                <div id="systemHealth" class="health-status">
+                    <div class="health-item">
+                        <span class="health-dot yellow"></span>
+                        Checking system status...
+                    </div>
+                </div>
+                <div class="health-actions">
+                    <button id="authenticateGoogle" class="btn-primary">🔑 Authenticate Google</button>
+                    <button id="clearCRM" class="btn-danger">🗑️ Clear CRM Data</button>
+                    <button id="removeDuplicates" class="btn-warning">🔄 Remove Duplicates</button>
+                    <button id="updateAllProspects" class="btn-info">🚀 Update All Prospects</button>
+                    <button id="exportData" class="btn-secondary">📥 Export CSV</button>
+                </div>
+                
+                <!-- Update All Prospects Modal -->
+                <div id="updateAllModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>🚀 Update All Prospects</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Cette opération va mettre à jour tous vos prospects existants avec les dernières données disponibles.</p>
+                            
+                            <div class="update-options">
+                                <h4>Options de mise à jour :</h4>
+                                <label class="option">
+                                    <input type="checkbox" id="findMissingEmails" checked>
+                                    <span class="checkmark"></span>
+                                    🔍 Rechercher les emails manquants
+                                    <small>Utilise Apollo.io, Hunter.io et patterns pour trouver les emails</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="updateScores" checked>
+                                    <span class="checkmark"></span>
+                                    📊 Recalculer les scores
+                                    <small>Actualise les scores basés sur les nouvelles données</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="cleanDuplicates" checked>
+                                    <span class="checkmark"></span>
+                                    🗑️ Supprimer les doublons
+                                    <small>Identifie et supprime les prospects en double</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="refreshLinkedInData">
+                                    <span class="checkmark"></span>
+                                    🔄 Actualiser données LinkedIn
+                                    <small>⚠️ Plus lent - Extraction des profils complets</small>
+                                </label>
+                            </div>
+                            
+                            <div class="performance-settings">
+                                <h4>Paramètres de performance :</h4>
+                                <div class="setting-row">
+                                    <label>Taille des lots :</label>
+                                    <select id="batchSize">
+                                        <option value="5">5 (plus lent, plus sûr)</option>
+                                        <option value="10" selected>10 (recommandé)</option>
+                                        <option value="20">20 (plus rapide)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-row">
+                                    <label>Traitement concurrent :</label>
+                                    <select id="maxConcurrent">
+                                        <option value="1">1 (séquentiel)</option>
+                                        <option value="3" selected>3 (recommandé)</option>
+                                        <option value="5">5 (plus rapide)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="estimated-time">
+                                <p><strong>Temps estimé :</strong> <span id="estimatedTime">5-15 minutes</span></p>
+                                <p><small>Vous recevrez un email de notification une fois terminé</small></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="cancelUpdate" class="btn-secondary">Annuler</button>
+                            <button id="startUpdate" class="btn-primary">🚀 Démarrer la mise à jour</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Update Progress -->
+                <div id="updateProgress" class="progress-section" style="display: none;">
+                    <h4>🔄 Mise à jour en cours...</h4>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">Initialisation...</div>
+                    <div id="progressStats" class="progress-stats">
+                        <span>Traités: <strong id="processedCount">0</strong></span>
+                        <span>Emails trouvés: <strong id="emailsFoundCount">0</strong></span>
+                        <span>Erreurs: <strong id="errorsCount">0</strong></span>
+                    </div>
+                    <button id="cancelUpdateProgress" class="btn-danger">❌ Annuler</button>
+                </div>
+            </section>
+
+            <!-- LinkedIn Search Section -->
+            <section class="card">
+                <h2>🔍 Search LinkedIn</h2>
+                
+                <!-- Scraping Method Selection -->
+                <div class="scraping-methods">
+                    <h3>📡 Choose Scraping Method</h3>
+                    <div class="method-selector">
+                        <label class="method-option recommended">
+                            <input type="radio" name="scrapingMethod" value="apollo" checked>
+                            <div class="method-card">
+                                <div class="method-header">
+                                    <span class="method-icon">🚀</span>
+                                    <span class="method-name">Apollo.io API</span>
+                                    <span class="method-badge free">FREE</span>
+                                </div>
+                                <div class="method-description">
+                                    VRAIS profils LinkedIn vérifiés + emails<br>
+                                    <small>275M+ profils, 10k crédits/mois gratuit</small>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="method-option">
+                            <input type="radio" name="scrapingMethod" value="selenium_dom">
+                            <div class="method-card">
+                                <div class="method-header">
+                                    <span class="method-icon">🤖</span>
+                                    <span class="method-name">Google Selenium DOM</span>
+                                    <span class="method-badge experimental">BETA</span>
+                                </div>
+                                <div class="method-description">
+                                    Selenium avec vraies interactions DOM<br>
+                                    <small>Clics automatiques, contournement détection</small>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="method-option">
+                            <input type="radio" name="scrapingMethod" value="mac_automation">
+                            <div class="method-card">
+                                <div class="method-header">
+                                    <span class="method-icon">🖱️</span>
+                                    <span class="method-name">Mac Keyboard Automation</span>
+                                    <span class="method-badge mac">MAC ONLY</span>
+                                </div>
+                                <div class="method-description">
+                                    AppleScript + Automator natif macOS<br>
+                                    <small>Automation système niveau OS</small>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="method-option">
+                            <input type="radio" name="scrapingMethod" value="hybrid_smart">
+                            <div class="method-card">
+                                <div class="method-header">
+                                    <span class="method-icon">🧠</span>
+                                    <span class="method-name">Hybrid Smart</span>
+                                    <span class="method-badge fallback">FALLBACK</span>
+                                </div>
+                                <div class="method-description">
+                                    Google + profils curatés intelligents<br>
+                                    <small>Toujours des résultats, 78 req/jour</small>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <form id="searchForm" class="search-form">
+                    <div class="search-container">
+                        <input type="text" 
+                               id="searchQuery" 
+                               placeholder="e.g. CTO startup Paris, Head of Sales SaaS, VP Marketing" 
+                               required>
+                        <input type="number" 
+                               id="searchLimit" 
+                               value="10" 
+                               min="1" 
+                               max="50" 
+                               title="Number of results (1-50)">
+                        <button type="submit" class="btn-search">
+                            🔍 Search
+                        </button>
+                    </div>
+                    <p class="search-hint">
+                        💡 Use specific job titles, companies, or locations for better results. 
+                        Press <kbd>Ctrl+K</kbd> to focus search.
+                    </p>
+                </form>
+
+                <!-- Search Results -->
+                <div class="search-results">
+                    <div class="results-header">
+                        <h3>Search Results</h3>
+                        <div class="results-stats">
+                            <span id="selectedCount">0</span> selected
+                        </div>
+                    </div>
+                    <div id="searchResults" class="results-container">
+                        <div class="empty-state">
+                            <p>No search results yet.</p>
+                            <p>Enter a search query above to find LinkedIn profiles.</p>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button id="selectAllBtn" class="btn-secondary" style="display: none;">
+                            ✅ Select All
+                        </button>
+                        <button id="deselectAllBtn" class="btn-secondary" style="display: none;">
+                            ❌ Deselect All
+                        </button>
+                        <button id="addSelectedBtn" class="btn-primary" disabled>
+                            Add Selected to CRM
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Logs Section -->
+            <section class="card">
+                <h2>📋 System Logs</h2>
+                <div class="logs-header">
+                    <div class="logs-controls">
+                        <button id="refreshLogs" class="btn-secondary">🔄 Refresh</button>
+                        <button id="clearLogs" class="btn-danger">🗑️ Clear Logs</button>
+                        <button id="toggleAutoRefresh" class="btn-primary">⏸️ Pause Auto-refresh</button>
+                        <select id="logLevel" class="log-level-select">
+                            <option value="">All Levels</option>
+                            <option value="info">Info</option>
+                            <option value="success">Success</option>
+                            <option value="warn">Warning</option>
+                            <option value="error">Error</option>
+                            <option value="debug">Debug</option>
+                        </select>
+                    </div>
+                    <div class="logs-stats">
+                        <span id="logsCount">0 logs</span> | Auto-refresh: <span id="autoRefreshStatus">ON</span>
+                    </div>
+                </div>
+                <div id="logsContainer" class="logs-container">
+                    <div class="empty-state">
+                        <p>Loading logs...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CRM Data Section -->
+            <section class="card">
+                <h2>📊 CRM Data</h2>
+                <div class="crm-header">
+                    <div class="crm-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="totalCount">0</span>
+                            <span class="stat-label">Total Prospects</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="selectedProspectsCount">0</span>
+                            <span class="stat-label">Selected</span>
+                        </div>
+                    </div>
+                    <div class="crm-actions">
+                        <button id="refreshProspects" class="btn-refresh">🔄 Refresh</button>
+                        <button id="selectAllProspects" class="btn-secondary">✅ Select All</button>
+                        <button id="deselectAllProspects" class="btn-secondary">❌ Deselect All</button>
+                        <button id="findEmailsBtn" class="btn-primary">📧 Find Emails</button>
+                    </div>
+                </div>
+                
+                <!-- Sequence Controls -->
+                <div class="sequence-controls">
+                    <div class="sequence-header">
+                        <h3>🚀 Automation Sequence</h3>
+                        <div class="sequence-status" id="sequenceStatus">
+                            <span class="status-dot yellow"></span>
+                            <span>Ready to configure</span>
+                        </div>
+                    </div>
+                    
+                    <div class="sequence-config">
+                        <div class="config-row">
+                            <div class="config-item">
+                                <label>📧 Email Context:</label>
+                                <textarea id="emailContext" rows="2" placeholder="Describe your company/service for AI email personalization...">We help companies accelerate their digital transformation with AI-powered solutions that reduce operational costs and improve efficiency.</textarea>
+                            </div>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-item">
+                                <label>🔗 LinkedIn Message Template:</label>
+                                <textarea id="linkedinTemplate" rows="2" placeholder="Hi {name}, I'd love to connect...">Hi {name}, I'd love to connect with you given your role as {title} at {company}. I believe we could have valuable discussions about industry trends.</textarea>
+                            </div>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="generateEmails" checked>
+                                    📧 Generate AI-personalized emails
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sendLinkedInConnections" checked>
+                                    🔗 Send LinkedIn connection requests
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="scheduleFollowups">
+                                    ⏰ Schedule follow-up reminders
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sequence-validation" id="sequenceValidation">
+                        <!-- Validation messages will appear here -->
+                    </div>
+                    
+                    <div class="sequence-actions">
+                        <button id="validateSequence" class="btn-secondary">🔍 Check Configuration</button>
+                        <button id="runFullSequence" class="btn-sequence" disabled>
+                            🚀 Run Full Sequence on Selected Prospects
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="prospectsTable" class="prospects-container">
+                    <div class="empty-state">
+                        <p>Loading prospects...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions & Settings -->
+            <section class="card">
+                <h2>⚡ Quick Actions & Settings</h2>
+                <div class="quick-actions">
+                    
+                    <!-- Email Configuration -->
+                    <div class="config-section">
+                        <h3>📧 Email Setup</h3>
+                        <div class="config-explanation">
+                            <p>Configure your Gmail account to enable automated email sending. Your credentials are stored securely and only used for sending emails.</p>
+                        </div>
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <label>Gmail Account:</label>
+                                <input type="email" id="gmailUser" placeholder="your-email@gmail.com">
+                            </div>
+                            <div class="config-item">
+                                <label>App Password:</label>
+                                <input type="password" id="gmailPassword" placeholder="App-specific password">
+                                <small><a href="https://support.google.com/accounts/answer/185833" target="_blank">🔗 How to generate an App Password</a></small>
+                            </div>
+                        </div>
+                        <button id="testEmail" class="btn-secondary">🧪 Test Email Configuration</button>
+                    </div>
+
+                    <!-- Workflow Quick Settings -->
+                    <div class="config-section">
+                        <h3>🎯 Workflow Quick Settings</h3>
+                        <div class="config-explanation">
+                            <p>These settings apply to the <strong>automation sequence above</strong> when you click "Run Full Sequence". Customize templates and preferences here.</p>
+                        </div>
+                        
+                        <div class="workflow-settings">
+                            <div class="setting-group">
+                                <h4>📧 Email Template Settings</h4>
+                                <label>Company/Service Description:</label>
+                                <textarea id="companyDescription" rows="2" placeholder="Describe what your company does for AI email personalization...">We help HR professionals streamline recruitment processes with AI-powered tools that reduce time-to-hire by 40% and improve candidate quality.</textarea>
+                                
+                                <label>Email Tone:</label>
+                                <select id="emailTone">
+                                    <option value="professional">Professional</option>
+                                    <option value="friendly">Friendly</option>
+                                    <option value="concise">Concise/Executive</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <h4>🔗 LinkedIn Settings</h4>
+                                <label>Default Connection Message:</label>
+                                <textarea id="defaultLinkedInMessage" rows="2" placeholder="Hi {name}, I'd love to connect with you given your role as {title} at {company}.">Hi {name}, I'd love to connect with you given your role as {title} at {company}. I believe we could have valuable discussions about industry trends.</textarea>
+                                
+                                <label>Wait time between actions:</label>
+                                <select id="actionDelay">
+                                    <option value="1">1 second (testing)</option>
+                                    <option value="3" selected>3 seconds (normal)</option>
+                                    <option value="5">5 seconds (safe)</option>
+                                    <option value="10">10 seconds (very safe)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-actions">
+                            <button id="saveWorkflowSettings" class="btn-primary">💾 Save Settings</button>
+                            <button id="resetToDefaults" class="btn-secondary">🔄 Reset to Defaults</button>
+                        </div>
+                    </div>
+
+                    <!-- Analytics & Monitoring -->
+                    <div class="config-section">
+                        <h3>📊 Today's Activity</h3>
+                        <div class="analytics-grid">
+                            <div class="metric-card">
+                                <h4>🔗 LinkedIn</h4>
+                                <div class="metric-value" id="linkedinConnections">0</div>
+                                <div class="metric-label">Connections Sent</div>
+                            </div>
+                            <div class="metric-card">
+                                <h4>📧 Emails</h4>
+                                <div class="metric-value" id="emailsSent">0</div>
+                                <div class="metric-label">Emails Generated</div>
+                            </div>
+                            <div class="metric-card">
+                                <h4>⏰ Follow-ups</h4>
+                                <div class="metric-value" id="followupsScheduled">0</div>
+                                <div class="metric-label">Scheduled</div>
+                            </div>
+                            <div class="metric-card">
+                                <h4>👥 Prospects</h4>
+                                <div class="metric-value" id="prospectsProcessed">0</div>
+                                <div class="metric-label">Processed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>💡 Tips: Use specific search terms for better results. Configure email automation for 24/7 outreach.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="update-all-prospects.js"></script>
+</body>
+</html>

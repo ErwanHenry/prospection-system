@@ -1,0 +1,80 @@
+{
+  "name": "prospection-system-hive",
+  "version": "1.0.0",
+  "description": "Multi-agent orchestration for LinkedIn prospection and CRM automation",
+  "agents": {
+    "ProspectSearcher": {
+      "type": "worker",
+      "description": "Searches and extracts LinkedIn prospects",
+      "capabilities": ["linkedin_search", "profile_extraction", "data_validation"],
+      "tools": ["linkedin_scraper", "profile_extractor", "data_validator"],
+      "priority": "high",
+      "max_concurrent": 3
+    },
+    "EmailFinder": {
+      "type": "worker", 
+      "description": "Finds and verifies email addresses for prospects",
+      "capabilities": ["email_search", "email_verification", "contact_enrichment"],
+      "tools": ["apollo_api", "hunter_api", "email_validator"],
+      "priority": "medium",
+      "max_concurrent": 5
+    },
+    "CRMManager": {
+      "type": "worker",
+      "description": "Manages Google Sheets CRM operations",
+      "capabilities": ["sheets_operations", "duplicate_detection", "data_sync"],
+      "tools": ["google_sheets_api", "data_processor", "duplicate_remover"],
+      "priority": "high",
+      "max_concurrent": 2
+    },
+    "QualityController": {
+      "type": "supervisor",
+      "description": "Validates data quality and coordinates workflow",
+      "capabilities": ["data_validation", "workflow_coordination", "error_handling"],
+      "tools": ["validator", "coordinator", "error_handler"],
+      "priority": "critical",
+      "max_concurrent": 1
+    },
+    "AutomationOrchestrator": {
+      "type": "queen",
+      "description": "Master coordinator for all prospection workflows",
+      "capabilities": ["workflow_management", "agent_coordination", "performance_optimization"],
+      "tools": ["workflow_engine", "performance_monitor", "resource_allocator"],
+      "priority": "critical",
+      "max_concurrent": 1
+    }
+  },
+  "workflows": {
+    "prospect_search": {
+      "description": "Search for prospects on LinkedIn",
+      "agents": ["ProspectSearcher", "QualityController"],
+      "sequence": ["search", "validate", "save"]
+    },
+    "email_enrichment": {
+      "description": "Find and verify emails for existing prospects",
+      "agents": ["EmailFinder", "QualityController", "CRMManager"],
+      "sequence": ["find_email", "verify", "update_crm"]
+    },
+    "full_prospection": {
+      "description": "Complete prospection workflow with CRM integration",
+      "agents": ["AutomationOrchestrator", "ProspectSearcher", "EmailFinder", "CRMManager", "QualityController"],
+      "sequence": ["coordinate", "search", "enrich", "validate", "save"]
+    }
+  },
+  "hooks": {
+    "on_prospect_found": "validate_and_enrich",
+    "on_email_found": "verify_and_save",
+    "on_error": "retry_with_backoff",
+    "on_duplicate": "merge_or_skip"
+  },
+  "performance": {
+    "max_parallel_agents": 10,
+    "retry_attempts": 3,
+    "timeout_seconds": 300,
+    "rate_limits": {
+      "linkedin_requests_per_hour": 100,
+      "email_searches_per_day": 1000,
+      "sheets_operations_per_minute": 60
+    }
+  }
+}

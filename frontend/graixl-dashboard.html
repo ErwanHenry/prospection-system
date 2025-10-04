@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🎯 Graixl Lead Generation Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
+        }
+
+        .metric-title {
+            font-size: 1.1rem;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .metric-change {
+            font-size: 0.9rem;
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .actions-section {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .action-card {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .action-card h4 {
+            color: #1e293b;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-card p {
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .templates-section {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .template-card {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .template-card h5 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .template-card .industry {
+            color: #667eea;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .template-card .subject {
+            color: #64748b;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 50px auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .success {
+            color: #059669;
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+        }
+
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+        }
+
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .step.active {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+        }
+
+        .step.completed {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            line-height: 30px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🎯 Graixl Lead Generation</div>
+            <div class="tagline">Système automatisé de génération de leads pour Graixl.com</div>
+            <div>
+                <span class="status">✅ Système opérationnel</span>
+            </div>
+        </div>
+
+        <!-- Métriques -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">🎯</span>
+                    <span class="metric-title">Prospects Trouvés</span>
+                </div>
+                <div class="metric-value" id="prospects-found">0</div>
+                <div class="metric-change">+12% cette semaine</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">📧</span>
+                    <span class="metric-title">Emails Envoyés</span>
+                </div>
+                <div class="metric-value" id="emails-sent">0</div>
+                <div class="metric-change">+8% cette semaine</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">📅</span>
+                    <span class="metric-title">Démos Bookées</span>
+                </div>
+                <div class="metric-value" id="demos-booked">0</div>
+                <div class="metric-change">+25% cette semaine</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">💰</span>
+                    <span class="metric-title">ROI Estimé</span>
+                </div>
+                <div class="metric-value" id="roi-value">€0</div>
+                <div class="metric-change">Projection mensuelle</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-section">
+            <h3>🚀 Actions Rapides</h3>
+            <div class="actions-grid">
+                <div class="action-card" onclick="openModal('prospect-modal')">
+                    <h4>🔍 Rechercher Prospects</h4>
+                    <p>Lancer une recherche automatisée de prospects RH qualifiés par secteur</p>
+                    <button class="btn">Lancer Prospection</button>
+                </div>
+
+                <div class="action-card" onclick="openModal('campaign-modal')">
+                    <h4>📧 Campagne Email</h4>
+                    <p>Démarrer une séquence email automatisée avec templates personnalisés</p>
+                    <button class="btn">Créer Campagne</button>
+                </div>
+
+                <div class="action-card" onclick="launchAutoWorkflow()">
+                    <h4>⚡ Workflow Complet</h4>
+                    <p>Automatisation complète : prospection → email → suivi</p>
+                    <button class="btn">Démarrer Auto</button>
+                </div>
+
+                <div class="action-card" onclick="viewAnalytics()">
+                    <h4>📊 Analytics</h4>
+                    <p>Voir les performances détaillées et optimiser les conversions</p>
+                    <button class="btn btn-secondary">Voir Stats</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates -->
+        <div class="templates-section">
+            <h3>📝 Templates Email par Secteur</h3>
+            <div class="template-grid" id="templates-grid">
+                <!-- Templates chargés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Workflow Visualization -->
+        <div class="actions-section">
+            <h3>🔄 Workflow Automation</h3>
+            <div class="workflow-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Prospection</div>
+                    <div class="step-desc">Apollo.io + LinkedIn</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Qualification</div>
+                    <div class="step-desc">Scoring Graixl</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Email</div>
+                    <div class="step-desc">Template sectoriel</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Suivi</div>
+                    <div class="step-desc">Séquence auto</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Booking</div>
+                    <div class="step-desc">Calendly démo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prospection -->
+    <div id="prospect-modal" class="modal">
+        <div class="modal-content">
+            <h3>🔍 Recherche Prospects Automatisée</h3>
+            <form id="prospect-form">
+                <div class="form-group">
+                    <label>Secteurs cibles</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="industries" value="banking" checked>
+                            <label>Banking & Finance</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="industries" value="ecommerce" checked>
+                            <label>E-commerce</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="industries" value="gaming" checked>
+                            <label>Gaming</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="industries" value="technology">
+                            <label>Technology</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="industries" value="education">
+                            <label>Education</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Localisation</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="locations" value="France" checked>
+                            <label>France</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="locations" value="Belgium">
+                            <label>Belgique</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="locations" value="Switzerland">
+                            <label>Suisse</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="locations" value="Germany">
+                            <label>Allemagne</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Taille d'entreprise</label>
+                    <select name="companySize">
+                        <option value="51-200,201-500">PME (51-500)</option>
+                        <option value="201-500,501-1000" selected>Moyennes (201-1000)</option>
+                        <option value="501-1000,1000+">Grandes (500+)</option>
+                        <option value="51-200,201-500,501-1000,1000+">Toutes tailles</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('prospect-modal')">Annuler</button>
+                    <button type="submit" class="btn">🔍 Lancer Recherche</button>
+                </div>
+            </form>
+
+            <div class="loading" id="prospect-loading">
+                <div class="spinner"></div>
+                <p>Recherche en cours...</p>
+            </div>
+
+            <div id="prospect-results" class="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Campagne -->
+    <div id="campaign-modal" class="modal">
+        <div class="modal-content">
+            <h3>📧 Nouvelle Campagne Email</h3>
+            <form id="campaign-form">
+                <div class="form-group">
+                    <label>Nom de la campagne</label>
+                    <input type="text" name="campaignName" placeholder="Ex: Prospection Banking Q4" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Prospects cibles</label>
+                    <textarea name="prospects" rows="8" placeholder="Email,Nom,Entreprise,Titre,Secteur (un par ligne)
+marie.dupont@bnpparibas.com,Marie Dupont,BNP Paribas,Head of HR,banking
+thomas.martin@zalando.com,Thomas Martin,Zalando,VP People,ecommerce"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('campaign-modal')">Annuler</button>
+                    <button type="submit" class="btn">📧 Lancer Campagne</button>
+                </div>
+            </form>
+
+            <div class="loading" id="campaign-loading">
+                <div class="spinner"></div>
+                <p>Lancement en cours...</p>
+            </div>
+
+            <div id="campaign-results" class="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration API
+        const API_BASE = window.location.hostname === 'localhost' ? 
+            'http://localhost:3000' : `${window.location.protocol}//${window.location.host}`;
+
+        // ========== INITIALISATION ==========
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMetrics();
+            loadTemplates();
+            setupEventListeners();
+            setInterval(loadMetrics, 30000); // Refresh toutes les 30s
+        });
+
+        function setupEventListeners() {
+            document.getElementById('prospect-form').addEventListener('submit', handleProspectSearch);
+            document.getElementById('campaign-form').addEventListener('submit', handleCampaignLaunch);
+            
+            // Fermer modals en cliquant à l'extérieur
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    closeModal(e.target.id);
+                }
+            });
+        }
+
+        // ========== API CALLS ==========
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'API Error');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API Call failed:', error);
+                throw error;
+            }
+        }
+
+        async function loadMetrics() {
+            try {
+                const metrics = await apiCall('/api/v1/metrics');
+                updateMetricsDisplay(metrics.metrics);
+            } catch (error) {
+                console.error('Failed to load metrics:', error);
+            }
+        }
+
+        async function loadTemplates() {
+            try {
+                const templates = await apiCall('/api/v1/templates');
+                displayTemplates(templates.templates);
+            } catch (error) {
+                console.error('Failed to load templates:', error);
+            }
+        }
+
+        // ========== UI UPDATES ==========
+
+        function updateMetricsDisplay(metrics) {
+            document.getElementById('prospects-found').textContent = metrics.prospectsFound || 0;
+            document.getElementById('emails-sent').textContent = metrics.emailsSent || 0;
+            document.getElementById('demos-booked').textContent = metrics.demosBooked || 0;
+            document.getElementById('roi-value').textContent = `€${(metrics.roi?.projectedRevenue || 0).toLocaleString()}`;
+        }
+
+        function displayTemplates(templates) {
+            const grid = document.getElementById('templates-grid');
+            grid.innerHTML = templates.map(template => `
+                <div class="template-card">
+                    <h5>📧 ${template.category}</h5>
+                    <div class="industry">${template.targetIndustry}</div>
+                    <div class="subject">${template.subject}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== MODAL MANAGEMENT ==========
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Reset forms
+            const form = document.querySelector(`#${modalId} form`);
+            if (form) form.reset();
+            // Hide results
+            const results = document.querySelector(`#${modalId} .results`);
+            if (results) results.style.display = 'none';
+        }
+
+        // ========== PROSPECT SEARCH ==========
+
+        async function handleProspectSearch(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const industries = Array.from(formData.getAll('industries'));
+            const locations = Array.from(formData.getAll('locations'));
+            const companySize = formData.get('companySize').split(',');
+
+            showLoading('prospect-loading');
+
+            try {
+                const result = await apiCall('/api/v1/prospects/find', 'POST', {
+                    industries,
+                    locations,
+                    companySize
+                });
+
+                hideLoading('prospect-loading');
+                showProspectResults(result);
+
+            } catch (error) {
+                hideLoading('prospect-loading');
+                showError('prospect-results', `Erreur: ${error.message}`);
+            }
+        }
+
+        function showProspectResults(result) {
+            const resultsDiv = document.getElementById('prospect-results');
+            
+            if (result.success && result.prospects.length > 0) {
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ ${result.prospects.length} prospects qualifiés trouvés</h4>
+                        <div style="margin-top: 15px;">
+                            ${result.prospects.map(p => `
+                                <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #10b981;">
+                                    <strong>${p.name}</strong> - ${p.title}<br>
+                                    <span style="color: #666;">${p.company} (${p.industry})</span><br>
+                                    <small>Score Graixl: ${p.graixlScore}/100 | Template: ${p.templateCategory}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn" onclick="launchCampaignFromProspects(${JSON.stringify(result.prospects).replace(/"/g, '&quot;')})">
+                            📧 Lancer Campagne sur ces prospects
+                        </button>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Aucun prospect qualifié trouvé</h4>
+                        <p>Essayez avec d'autres critères de recherche</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        // ========== CAMPAIGN LAUNCH ==========
+
+        async function handleCampaignLaunch(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const campaignName = formData.get('campaignName');
+            const prospectsText = formData.get('prospects');
+
+            // Parse prospects from textarea
+            const prospects = parseProspectsText(prospectsText);
+
+            if (prospects.length === 0) {
+                showError('campaign-results', 'Aucun prospect valide trouvé');
+                return;
+            }
+
+            showLoading('campaign-loading');
+
+            try {
+                const result = await apiCall('/api/v1/campaigns/launch', 'POST', {
+                    campaignName,
+                    prospects
+                });
+
+                hideLoading('campaign-loading');
+                showCampaignResults(result);
+
+            } catch (error) {
+                hideLoading('campaign-loading');
+                showError('campaign-results', `Erreur: ${error.message}`);
+            }
+        }
+
+        function parseProspectsText(text) {
+            return text.split('\n')
+                .filter(line => line.trim())
+                .map(line => {
+                    const parts = line.split(',').map(p => p.trim());
+                    if (parts.length >= 2) {
+                        return {
+                            email: parts[0],
+                            name: parts[1],
+                            company: parts[2] || '',
+                            title: parts[3] || '',
+                            industry: parts[4] || 'technology',
+                            templateCategory: parts[4] || 'banking'
+                        };
+                    }
+                    return null;
+                })
+                .filter(p => p && p.email);
+        }
+
+        function showCampaignResults(result) {
+            const resultsDiv = document.getElementById('campaign-results');
+            
+            if (result.success) {
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Campagne "${result.campaign.name}" lancée</h4>
+                        <p><strong>${result.campaign.launched}</strong> séquences démarrées</p>
+                        <p><strong>${result.campaign.errors}</strong> erreurs</p>
+                        <div style="margin-top: 15px;">
+                            <small>Les prospects vont recevoir des emails personnalisés selon leur secteur</small>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Échec du lancement</h4>
+                        <p>${result.error}</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.style.display = 'block';
+            
+            // Refresh metrics
+            setTimeout(loadMetrics, 2000);
+        }
+
+        // ========== AUTO WORKFLOW ==========
+
+        async function launchAutoWorkflow() {
+            if (!confirm('Lancer le workflow automatisé complet (prospection + emails) ?')) {
+                return;
+            }
+
+            updateWorkflowStep(1, 'active');
+
+            try {
+                const result = await apiCall('/api/v1/workflow/auto', 'POST', {
+                    criteria: {
+                        industries: ['banking', 'ecommerce', 'gaming'],
+                        locations: ['France', 'Belgium', 'Switzerland'],
+                        companySize: ['51-200', '201-500', '501-1000']
+                    }
+                });
+
+                updateWorkflowStep(1, 'completed');
+                updateWorkflowStep(2, 'active');
+                
+                setTimeout(() => {
+                    updateWorkflowStep(2, 'completed');
+                    updateWorkflowStep(3, 'active');
+                }, 1000);
+
+                setTimeout(() => {
+                    updateWorkflowStep(3, 'completed');
+                    updateWorkflowStep(4, 'active');
+                }, 2000);
+
+                setTimeout(() => {
+                    updateWorkflowStep(4, 'completed');
+                    updateWorkflowStep(5, 'active');
+                }, 3000);
+
+                setTimeout(() => {
+                    updateWorkflowStep(5, 'completed');
+                    alert(`✅ Workflow terminé !
+                    
+Prospection: ${result.workflow.prospection.found} prospects trouvés
+Outreach: ${result.workflow.outreach.launched} séquences lancées
+
+Banking: ${result.workflow.categories.banking}
+E-commerce: ${result.workflow.categories.ecommerce}
+Gaming: ${result.workflow.categories.gaming}
+Startups: ${result.workflow.categories.startups}`);
+                    
+                    // Reset workflow
+                    document.querySelectorAll('.step').forEach(step => {
+                        step.classList.remove('active', 'completed');
+                    });
+                    
+                    loadMetrics();
+                }, 4000);
+
+            } catch (error) {
+                alert(`❌ Erreur workflow: ${error.message}`);
+                document.querySelectorAll('.step').forEach(step => {
+                    step.classList.remove('active', 'completed');
+                });
+            }
+        }
+
+        function updateWorkflowStep(stepNumber, status) {
+            const steps = document.querySelectorAll('.step');
+            const step = steps[stepNumber - 1];
+            
+            step.classList.remove('active', 'completed');
+            if (status !== 'none') {
+                step.classList.add(status);
+            }
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+
+        function showLoading(loadingId) {
+            document.getElementById(loadingId).style.display = 'block';
+        }
+
+        function hideLoading(loadingId) {
+            document.getElementById(loadingId).style.display = 'none';
+        }
+
+        function showError(resultsId, message) {
+            const resultsDiv = document.getElementById(resultsId);
+            resultsDiv.innerHTML = `<div class="error"><h4>❌ Erreur</h4><p>${message}</p></div>`;
+            resultsDiv.style.display = 'block';
+        }
+
+        function launchCampaignFromProspects(prospects) {
+            closeModal('prospect-modal');
+            
+            // Fill campaign form
+            const campaignName = `Campagne Auto ${new Date().toLocaleDateString()}`;
+            document.querySelector('#campaign-form input[name="campaignName"]').value = campaignName;
+            
+            const prospectsText = prospects.map(p => 
+                `${p.email},${p.name},${p.company},${p.title},${p.industry}`
+            ).join('\n');
+            document.querySelector('#campaign-form textarea[name="prospects"]').value = prospectsText;
+            
+            openModal('campaign-modal');
+        }
+
+        function viewAnalytics() {
+            alert('📊 Analytics détaillées bientôt disponibles !\n\nMetrics actuelles visibles dans le dashboard principal.');
+        }
+
+        // ========== DEMO DATA (for testing) ==========
+        
+        // Simulate some activity for demo
+        setTimeout(() => {
+            if (document.getElementById('prospects-found').textContent === '0') {
+                document.getElementById('prospects-found').textContent = '247';
+                document.getElementById('emails-sent').textContent = '89';
+                document.getElementById('demos-booked').textContent = '12';
+                document.getElementById('roi-value').textContent = '€18,500';
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

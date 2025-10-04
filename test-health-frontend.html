@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Check Test</title>
+</head>
+<body>
+    <div id="systemHealth">Loading...</div>
+    <div id="status">Initializing...</div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function testHealthCheck() {
+            try {
+                console.log('Testing health endpoint...');
+                const response = await fetch(`${API_URL}/health`);
+                const health = await response.json();
+                
+                console.log('Health response:', health);
+                
+                // Update status indicators  
+                const googleStatus = health.googleSheets === 'connected';
+                const linkedinStatus = health.linkedin === 'ready';
+                
+                console.log('Google status:', googleStatus);
+                console.log('LinkedIn status:', linkedinStatus);
+                
+                // Update health display
+                document.getElementById('systemHealth').innerHTML = `
+                    <div>
+                        <span>🟢</span>
+                        Google Sheets: ${health.googleSheets || 'unknown'}
+                    </div>
+                    <div>
+                        <span>${linkedinStatus ? '🟢' : '🟡'}</span>
+                        LinkedIn: ${health.linkedin || 'inactive'}
+                    </div>
+                    <div>
+                        <span>🟢</span>
+                        Server: ${health.status}
+                    </div>
+                `;
+                
+                document.getElementById('status').innerHTML = 
+                    googleStatus ? '✅ System is ready!' : '⚠️ Google Sheets not connected';
+                
+            } catch (error) {
+                console.error('Health check failed:', error);
+                document.getElementById('systemHealth').innerHTML = 'Error: ' + error.message;
+                document.getElementById('status').innerHTML = 'Health check failed';
+            }
+        }
+
+        // Run test when page loads
+        testHealthCheck();
+    </script>
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 CRM Prospection LinkedIn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #0077b5;
+            margin-bottom: 20px;
+        }
+
+        .linkedin-status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card p {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        section {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #0077b5;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .linkedin-search {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls input[type="text"] {
+            flex: 1;
+        }
+
+        .search-controls input[type="number"] {
+            width: 100px;
+        }
+
+        input, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #0077b5;
+            box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 119, 181, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .cookie-setup {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: #0077b5;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-card.selected {
+            background: #e3f2fd;
+            border-color: #0077b5;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .result-info h4 {
+            color: #0077b5;
+            margin-bottom: 5px;
+        }
+
+        .result-checkbox {
+            width: 20px;
+            height: 20px;
+        }
+
+        .prospect-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .prospect-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #0077b5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0077b5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        .notification.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn-linkedin {
+            background: #0077b5;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 CRM Prospection LinkedIn</h1>
+            
+            <div class="linkedin-status" id="linkedinStatus">
+                <div>
+                    <strong>LinkedIn Status:</strong>
+                    <span id="statusText">Non connecté</span>
+                </div>
+                <span class="status-badge status-disconnected" id="statusBadge">Déconnecté</span>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Prospects</h3>
+                    <p id="totalProspects">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Importés aujourd'hui</h3>
+                    <p id="importedToday">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Contactés</h3>
+                    <p id="contacted">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Taux de réponse</h3>
+                    <p id="responseRate">0%</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Section LinkedIn Search -->
+        <section>
+            <h2>🔍 Recherche LinkedIn avec Puppeteer</h2>
+            
+            <div id="cookieSetup" class="cookie-setup">
+                <p><strong>⚠️ Configuration requise:</strong> Ajoutez votre cookie LinkedIn dans le fichier .env</p>
+                <p style="font-size: 14px; margin-top: 10px;">
+                    1. Éditez le fichier: <code>nano ~/prospection-system/.env</code><br>
+                    2. Remplacez PASTE_YOUR_LI_AT_COOKIE_HERE par votre cookie li_at<br>
+                    3. Redémarrez le serveur
+                </p>
+                <button onclick="checkLinkedInStatus()" style="margin-top: 10px;">Vérifier la connexion</button>
+            </div>
+
+            <div id="searchSection" class="linkedin-search">
+                <div class="search-controls">
+                    <input type="text" id="searchQuery" placeholder="Ex: CTO startup Paris, Head of Sales SaaS" value="CTO startup Paris">
+                    <input type="number" id="searchLimit" placeholder="Nombre" value="10" min="1" max="20">
+                    <button onclick="searchLinkedIn()" id="searchBtn">
+                        🔍 Rechercher sur LinkedIn
+                    </button>
+                </div>
+
+                <div id="searchResults" class="search-results"></div>
+
+                <div id="importActions" style="display: none; margin-top: 20px;">
+                    <button onclick="importSelected()" class="btn-success">
+                        📥 Importer les profils sélectionnés dans le CRM
+                    </button>
+                    <span id="selectedCount" style="margin-left: 10px;">0 sélectionnés</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Ajout Manuel -->
+        <section>
+            <h2>➕ Ajout manuel de prospects</h2>
+            <form id="prospectForm">
+                <div class="form-row">
+                    <input type="text" id="firstName" placeholder="Prénom" required>
+                    <input type="text" id="lastName" placeholder="Nom" required>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="company" placeholder="Entreprise" required>
+                    <input type="text" id="position" placeholder="Poste" required>
+                </div>
+                <div class="form-row">
+                    <input type="url" id="linkedinUrl" placeholder="URL LinkedIn" required>
+                    <input type="email" id="email" placeholder="Email (optionnel)">
+                </div>
+                <button type="submit">Ajouter au CRM</button>
+            </form>
+        </section>
+
+        <!-- Liste des prospects -->
+        <section>
+            <h2>📋 Prospects dans le CRM Google Sheets</h2>
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="filterProspects" placeholder="Filtrer les prospects..." onkeyup="filterProspectsList()">
+            </div>
+            <div id="prospectsTable">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des prospects...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3000/api';
+        
+        // État global
+        let prospects = [];
+        let linkedInConnected = false;
+        let searchResults = [];
+        let selectedProfiles = new Set();
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkLinkedInStatus();
+            await loadProspects();
+            
+            document.getElementById('prospectForm').addEventListener('submit', handleAddProspect);
+        });
+
+        // Vérifier le statut LinkedIn
+        async function checkLinkedInStatus() {
+            try {
+                const response = await fetch(`${API_URL}/linkedin/status`);
+                const status = await response.json();
+                
+                linkedInConnected = status.authenticated;
+                
+                if (linkedInConnected) {
+                    document.getElementById('statusText').textContent = 'Connecté avec Puppeteer';
+                    document.getElementById('statusBadge').textContent = 'Connecté';
+                    document.getElementById('statusBadge').className = 'status-badge status-connected';
+                    document.getElementById('cookieSetup').style.display = 'none';
+                } else {
+                    // Essayer d'initialiser avec le cookie du .env
+                    const configResponse = await fetch(`${API_URL}/config`);
+                    const config = await configResponse.json();
+                    
+                    if (config.hasLinkedInCookie) {
+                        showNotification('Initialisation de LinkedIn avec Puppeteer...', 'info');
+                        
+                        const initResponse = await fetch(`${API_URL}/linkedin/initialize`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ cookie: 'FROM_ENV' })
+                        });
+                        
+                        if (initResponse.ok) {
+                            linkedInConnected = true;
+                            await checkLinkedInStatus();
+                        } else {
+                            showNotification('Cookie LinkedIn invalide ou expiré', 'error');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur statut LinkedIn:', error);
+            }
+        }
+
+        // Recherche LinkedIn avec Puppeteer
+        async function searchLinkedIn() {
+            if (!linkedInConnected) {
+                showNotification('Configurez d\'abord votre cookie LinkedIn dans .env', 'error');
+                return;
+            }
+            
+            const query = document.getElementById('searchQuery').value;
+            const limit = document.getElementById('searchLimit').value || 10;
+            
+            if (!query) {
+                showNotification('Entrez une recherche', 'error');
+                return;
+            }
+            
+            const searchBtn = document.getElementById('searchBtn');
+            searchBtn.disabled = true;
+            searchBtn.textContent = '⏳ Recherche en cours avec Puppeteer...';
+            
+            document.getElementById('searchResults').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Puppeteer scrape LinkedIn...</p>
+                    <p style="font-size: 12px; color: #666;">Cela peut prendre 10-30 secondes</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_URL}/linkedin/search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, limit: parseInt(limit) })
+                });
+                
+                if (!response.ok) throw new Error('Erreur de recherche');
+                
+                const data = await response.json();
+                searchResults = data.profiles;
+                displaySearchResults();
+                
+                showNotification(`✅ ${data.count} profils trouvés avec Puppeteer`, 'success');
+                
+            } catch (error) {
+                showNotification('Erreur lors de la recherche LinkedIn', 'error');
+                document.getElementById('searchResults').innerHTML = '<p>Erreur lors de la recherche</p>';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '🔍 Rechercher sur LinkedIn';
+            }
+        }
+
+        // Afficher les résultats
+        function displaySearchResults() {
+            const container = document.getElementById('searchResults');
+            
+            if (searchResults.length === 0) {
+                container.innerHTML = '<p>Aucun résultat trouvé</p>';
+                return;
+            }
+            
+            selectedProfiles.clear();
+            
+            const html = searchResults.map((profile, index) => `
+                <div class="result-card" onclick="toggleSelection(${index})">
+                    <div class="result-header">
+                        <div class="result-info">
+                            <h4>${profile.firstName} ${profile.lastName}</h4>
+                            <p><strong>${profile.position}</strong> ${profile.company ? 'chez ' + profile.company : ''}</p>
+                            <p>📍 ${profile.location || 'Non renseigné'}</p>
+                            <p>🔗 <a href="${profile.linkedinUrl}" target="_blank" onclick="event.stopPropagation()">Voir le profil</a></p>
+                        </div>
+                        <input type="checkbox" class="result-checkbox" id="select-${index}" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+            document.getElementById('importActions').style.display = 'block';
+            updateSelectedCount();
+        }
+
+        // Sélection des profils
+        function toggleSelection(index) {
+            const checkbox = document.getElementById(`select-${index}`);
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                selectedProfiles.add(index);
+                checkbox.parentElement.parentElement.classList.add('selected');
+            } else {
+                selectedProfiles.delete(index);
+                checkbox.parentElement.parentElement.classList.remove('selected');
+            }
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `${selectedProfiles.size} sélectionnés`;
+        }
+
+        // Importer les profils sélectionnés
+        async function importSelected() {
+            if (selectedProfiles.size === 0) {
+                showNotification('Sélectionnez au moins un profil', 'error');
+                return;
+            }
+            
+            const profilesToImport = Array.from(selectedProfiles).map(i => searchResults[i]);
+            
+            showNotification(`Import de ${profilesToImport.length} profils...`, 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/linkedin/add-to-crm`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profiles: profilesToImport })
+                });
+                
+                if (!response.ok) throw new Error('Erreur d\'import');
+                
+                const result = await response.json();
+                showNotification(`✅ ${result.message}`, 'success');
+                
+                // Recharger les prospects
+                await loadProspects();
+                
+                // Réinitialiser la recherche
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('importActions').style.display = 'none';
+                searchResults = [];
+                selectedProfiles.clear();
+                
+            } catch (error) {
+                showNotification('Erreur lors de l\'import', 'error');
+            }
+        }
+
+        // Charger les prospects
+        async function loadProspects() {
+            try {
+                const response = await fetch(`${API_URL}/prospects`);
+                if (response.ok) {
+                    prospects = await response.json();
+                    displayProspects();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Erreur chargement prospects:', error);
+            }
+        }
+
+        // Afficher les prospects
+        function displayProspects() {
+            const container = document.getElementById('prospectsTable');
+            
+            if (prospects.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px;">Aucun prospect dans le CRM</p>';
+                return;
+            }
+            
+            const html = prospects.map(prospect => `
+                <div class="prospect-card">
+                    <div class="prospect-info">
+                        <h3>${prospect.firstName} ${prospect.lastName}</h3>
+                        <p>${prospect.position} chez ${prospect.company}</p>
+                        <p style="font-size: 12px; color: #999;">
+                            ${prospect.email || 'Email non renseigné'} | 
+                            Ajouté le ${new Date(prospect.dateAdded).toLocaleDateString('fr-FR')}
+                        </p>
+                        ${prospect.notes ? `<p style="font-size: 12px; color: #666;">📝 ${prospect.notes}</p>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <a href="${prospect.linkedinUrl}" target="_blank" class="button btn-linkedin" style="padding: 8px 16px; font-size: 14px; text-decoration: none;">
+                            LinkedIn →
+                        </a>
+                        <span class="status-badge ${prospect.status === 'Nouveau' ? 'status-disconnected' : 'status-connected'}">
+                            ${prospect.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        // Filtrer les prospects
+        function filterProspectsList() {
+            const search = document.getElementById('filterProspects').value.toLowerCase();
+            const cards = document.querySelectorAll('.prospect-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(search) ? 'grid' : 'none';
+            });
+        }
+
+        // Mettre à jour les stats
+        function updateStats() {
+            document.getElementById('totalProspects').textContent = prospects.length;
+            
+            const today = new Date().toDateString();
+            const importedToday = prospects.filter(p => 
+                new Date(p.dateAdded).toDateString() === today
+            ).length;
+            document.getElementById('importedToday').textContent = importedToday;
+            
+            const contacted = prospects.filter(p => p.status !== 'Nouveau').length;
+            document.getElementById('contacted').textContent = contacted;
+            
+            const responded = prospects.filter(p => p.status === 'Répondu').length;
+            const rate = contacted > 0 ? Math.round((responded / contacted) * 100) : 0;
+            document.getElementById('responseRate').textContent = rate + '%';
+        }
+
+        // Ajouter manuellement
+        async function handleAddProspect(e) {
+            e.preventDefault();
+            
+            const prospect = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                company: document.getElementById('company').value,
+                position: document.getElementById('position').value,
+                linkedinUrl: document.getElementById('linkedinUrl').value,
+                email: document.getElementById('email').value || ''
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/prospects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(prospect)
+                });
+                
+                if (response.ok) {
+                    showNotification('✅ Prospect ajouté avec succès!', 'success');
+                    document.getElementById('prospectForm').reset();
+                    await loadProspects();
+                }
+            } catch (error) {
+                showNotification('Erreur lors de l\'ajout', 'error');
+            }
+        }
+
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

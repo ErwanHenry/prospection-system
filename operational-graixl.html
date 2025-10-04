@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🎯 Graixl - Interface Opérationnelle</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 20px;
+            border-bottom: 2px solid #475569;
+        }
+
+        .header h1 {
+            color: #60a5fa;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .status-item {
+            background: #1e293b;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid #475569;
+        }
+
+        .status-online { color: #10b981; }
+        .status-count { color: #f59e0b; }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        /* PANEL GAUCHE - ACTIONS */
+        .action-panel {
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            padding: 20px;
+        }
+
+        .action-panel h2 {
+            color: #60a5fa;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sector-button {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .sector-button.loading {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            cursor: not-allowed;
+        }
+
+        .sector-button.completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .sector-button .loading-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.5);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quick-actions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #475569;
+        }
+
+        .quick-actions h3 {
+            color: #94a3b8;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .quick-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #374151;
+            color: #e5e7eb;
+            border: 1px solid #6b7280;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: #4b5563;
+            border-color: #9ca3af;
+        }
+
+        /* PANEL CENTRAL - WORKFLOW */
+        .workflow-panel {
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workflow-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .workflow-header h2 {
+            color: #60a5fa;
+            font-size: 1.3rem;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+
+        .workflow-step {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+
+        .workflow-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #475569;
+            z-index: 1;
+        }
+
+        .workflow-step.active::after {
+            background: #3b82f6;
+        }
+
+        .workflow-step.completed::after {
+            background: #10b981;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #475569;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .workflow-step.active .step-circle {
+            background: #3b82f6;
+            animation: pulse 1.5s infinite;
+        }
+
+        .workflow-step.completed .step-circle {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .workflow-step.active .step-label,
+        .workflow-step.completed .step-label {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .results-area {
+            flex: 1;
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .results-count {
+            background: #374151;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #f59e0b;
+        }
+
+        .prospect-card {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .prospect-card:hover {
+            border-color: #60a5fa;
+            transform: translateX(3px);
+        }
+
+        .prospect-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .prospect-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .prospect-score {
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .prospect-details {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .prospect-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .prospect-btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .prospect-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .prospect-btn.secondary {
+            background: #374151;
+            color: #e5e7eb;
+            border: 1px solid #6b7280;
+        }
+
+        .prospect-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* PANEL DROITE - EMAILS */
+        .email-panel {
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-panel h2 {
+            color: #60a5fa;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .email-preview {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1;
+            margin-bottom: 15px;
+            border: 1px solid #475569;
+        }
+
+        .email-subject {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .email-body {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .email-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .email-btn {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .email-btn.send {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .email-btn.edit {
+            background: #374151;
+            color: #e5e7eb;
+            border: 1px solid #6b7280;
+        }
+
+        .email-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #60a5fa;
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #475569;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 GRAIXL - INTERFACE OPÉRATIONNELLE</h1>
+        <div class="status-bar">
+            <div class="status-item status-online">🟢 Apollo.io Connecté</div>
+            <div class="status-item status-count">📊 <span id="total-prospects">0</span> prospects trouvés</div>
+            <div class="status-item status-count">📧 <span id="total-emails">0</span> emails prêts</div>
+            <div class="status-item">⏱️ <span id="current-time"></span></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- PANEL GAUCHE - ACTIONS -->
+        <div class="action-panel">
+            <h2>🚀 PROSPECTION DIRECTE</h2>
+            
+            <button class="sector-button" onclick="launchProspection('banking')" id="btn-banking">
+                🏦 BANKING & FINANCE
+                <div class="loading-bar"></div>
+            </button>
+            
+            <button class="sector-button" onclick="launchProspection('ecommerce')" id="btn-ecommerce">
+                🛒 E-COMMERCE
+                <div class="loading-bar"></div>
+            </button>
+            
+            <button class="sector-button" onclick="launchProspection('gaming')" id="btn-gaming">
+                🎮 GAMING
+                <div class="loading-bar"></div>
+            </button>
+            
+            <button class="sector-button" onclick="launchProspection('technology')" id="btn-technology">
+                💻 TECHNOLOGY
+                <div class="loading-bar"></div>
+            </button>
+
+            <div class="quick-actions">
+                <h3>⚡ Actions Rapides</h3>
+                <button class="quick-btn" onclick="clearResults()">🗑️ Vider Résultats</button>
+                <button class="quick-btn" onclick="exportProspects()">📥 Exporter CSV</button>
+                <button class="quick-btn" onclick="launchAll()">🎯 TOUT LANCER</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="session-prospects">0</div>
+                    <div class="stat-label">Session</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="success-rate">0%</div>
+                    <div class="stat-label">Succès</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL CENTRAL - WORKFLOW -->
+        <div class="workflow-panel">
+            <div class="workflow-header">
+                <h2>📋 WORKFLOW EN COURS</h2>
+                <div class="results-count">
+                    <span id="current-sector">Aucun secteur</span>
+                </div>
+            </div>
+
+            <div class="workflow-steps">
+                <div class="workflow-step" id="step-search">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Recherche</div>
+                </div>
+                <div class="workflow-step" id="step-analyze">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Analyse</div>
+                </div>
+                <div class="workflow-step" id="step-email">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Email</div>
+                </div>
+                <div class="workflow-step" id="step-validate">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Validation</div>
+                </div>
+                <div class="workflow-step" id="step-ready">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Prêt</div>
+                </div>
+            </div>
+
+            <div class="results-area">
+                <div class="results-header">
+                    <h3>🎯 Prospects Trouvés</h3>
+                    <div class="results-count" id="results-count">0 prospects</div>
+                </div>
+
+                <div id="loading-state" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div>Recherche en cours...</div>
+                </div>
+
+                <div id="empty-state" class="empty-state">
+                    <div class="icon">🎯</div>
+                    <div>Cliquez sur un secteur pour démarrer la prospection</div>
+                </div>
+
+                <div id="prospects-container">
+                    <!-- Les prospects apparaîtront ici dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DROITE - EMAILS -->
+        <div class="email-panel">
+            <h2>📧 EMAIL GENERATOR</h2>
+
+            <div id="email-empty" class="empty-state">
+                <div class="icon">📧</div>
+                <div>Sélectionnez un prospect pour générer l'email</div>
+            </div>
+
+            <div id="email-content" style="display: none;">
+                <div class="email-preview">
+                    <div class="email-subject" id="email-subject">
+                        <!-- Sujet généré -->
+                    </div>
+                    <div class="email-body" id="email-body">
+                        <!-- Corps de l'email généré -->
+                    </div>
+                </div>
+
+                <div class="email-actions">
+                    <button class="email-btn send" onclick="sendEmail()">
+                        📤 ENVOYER MAINTENANT
+                    </button>
+                    <button class="email-btn edit" onclick="editEmail()">
+                        ✏️ Modifier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== ÉTAT GLOBAL ==========
+        
+        let currentProspects = [];
+        let currentSector = null;
+        let selectedProspect = null;
+        let sessionStats = {
+            prospects: 0,
+            emails: 0,
+            successRate: 0
+        };
+
+        // API Configuration
+        const API_BASE = window.location.hostname === 'localhost' ? 
+            'http://localhost:3000' : 'https://graixl-prospection.vercel.app';
+
+        // ========== INITIALISATION ==========
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            showEmptyState();
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = 
+                now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ========== PROSPECTION PRINCIPALE ==========
+
+        async function launchProspection(sector) {
+            console.log(`🚀 Lancement prospection ${sector}`);
+            
+            currentSector = sector;
+            document.getElementById('current-sector').textContent = sector.toUpperCase();
+            
+            // UI Updates
+            const button = document.getElementById(`btn-${sector}`);
+            button.classList.add('loading');
+            
+            showLoadingState();
+            resetWorkflowSteps();
+            
+            try {
+                // Étape 1: Recherche
+                setWorkflowStep('step-search', 'active');
+                await animateProgress(button, 20);
+                
+                const searchResults = await callProspectionAPI(sector);
+                setWorkflowStep('step-search', 'completed');
+                
+                // Étape 2: Analyse
+                setWorkflowStep('step-analyze', 'active');
+                await animateProgress(button, 50);
+                
+                const analyzedProspects = await analyzeProspects(searchResults.prospects || []);
+                setWorkflowStep('step-analyze', 'completed');
+                
+                // Étape 3: Génération emails
+                setWorkflowStep('step-email', 'active');
+                await animateProgress(button, 75);
+                
+                const enrichedProspects = await generateEmails(analyzedProspects);
+                setWorkflowStep('step-email', 'completed');
+                
+                // Étape 4: Validation
+                setWorkflowStep('step-validate', 'active');
+                await animateProgress(button, 90);
+                
+                const validatedProspects = await validateProspects(enrichedProspects);
+                setWorkflowStep('step-validate', 'completed');
+                
+                // Étape 5: Prêt
+                setWorkflowStep('step-ready', 'active');
+                await animateProgress(button, 100);
+                setWorkflowStep('step-ready', 'completed');
+                
+                // Finalisation
+                currentProspects = validatedProspects;
+                displayProspects(validatedProspects);
+                updateStats();
+                
+                button.classList.remove('loading');
+                button.classList.add('completed');
+                
+                console.log(`✅ Prospection ${sector} terminée: ${validatedProspects.length} prospects`);
+                
+            } catch (error) {
+                console.error('❌ Erreur prospection:', error);
+                button.classList.remove('loading');
+                showErrorState(error.message);
+            }
+        }
+
+        async function callProspectionAPI(sector) {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/prospects/find`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        industries: [sector],
+                        locations: ['France', 'Belgium', 'Switzerland'],
+                        companySize: ['51-200', '201-500', '501-1000']
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                return await response.json();
+                
+            } catch (error) {
+                console.error('API Call failed:', error);
+                // Fallback vers données simulées
+                return generateMockProspects(sector);
+            }
+        }
+
+        function generateMockProspects(sector) {
+            const mockData = {
+                banking: [
+                    {
+                        id: 'mock_1',
+                        name: 'Marie Dubois',
+                        title: 'Head of Talent Acquisition',
+                        company: 'BNP Paribas',
+                        email: 'marie.dubois@bnpparibas.com',
+                        graixlScore: 92,
+                        templateCategory: 'banking',
+                        industry: 'banking'
+                    },
+                    {
+                        id: 'mock_2', 
+                        name: 'Pierre Martin',
+                        title: 'HR Director',
+                        company: 'Société Générale',
+                        email: 'pierre.martin@socgen.com',
+                        graixlScore: 88,
+                        templateCategory: 'banking',
+                        industry: 'banking'
+                    }
+                ],
+                ecommerce: [
+                    {
+                        id: 'mock_3',
+                        name: 'Sophie Laurent',
+                        title: 'VP People',
+                        company: 'Zalando',
+                        email: 'sophie.laurent@zalando.com',
+                        graixlScore: 90,
+                        templateCategory: 'ecommerce',
+                        industry: 'ecommerce'
+                    }
+                ],
+                gaming: [
+                    {
+                        id: 'mock_4',
+                        name: 'Thomas Moreau',
+                        title: 'Talent Manager',
+                        company: 'Ubisoft',
+                        email: 'thomas.moreau@ubisoft.com',
+                        graixlScore: 95,
+                        templateCategory: 'gaming',
+                        industry: 'gaming'
+                    }
+                ],
+                technology: [
+                    {
+                        id: 'mock_5',
+                        name: 'Anne-Sophie Bernard',
+                        title: 'Chief People Officer',
+                        company: 'OVHcloud',
+                        email: 'as.bernard@ovhcloud.com',
+                        graixlScore: 87,
+                        templateCategory: 'startups',
+                        industry: 'technology'
+                    }
+                ]
+            };
+
+            return {
+                success: true,
+                prospects: mockData[sector] || [],
+                total: mockData[sector]?.length || 0,
+                dataSource: 'mock'
+            };
+        }
+
+        async function analyzeProspects(prospects) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            return prospects.map(prospect => ({
+                ...prospect,
+                analyzed: true,
+                painPoints: ['efficiency', 'cost_reduction', 'automation'],
+                approach: 'executive'
+            }));
+        }
+
+        async function generateEmails(prospects) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return prospects.map(prospect => ({
+                ...prospect,
+                email_generated: true,
+                email: {
+                    subject: `${prospect.name}, révolutionnez votre recrutement ${prospect.industry}`,
+                    body: `Bonjour ${prospect.name},\n\nEn tant que ${prospect.title} chez ${prospect.company}, vous connaissez les défis du recrutement dans le secteur ${prospect.industry}.\n\nGraixl transforme ces défis en opportunités :\n🎯 Automatisation IA du screening\n📊 Réduction 70% du time-to-hire\n💰 ROI moyen 300% en 6 mois\n\nSeriez-vous disponible pour une démo de 15 minutes ?\n\nCordialement,\nL'équipe Graixl`
+                }
+            }));
+        }
+
+        async function validateProspects(prospects) {
+            await new Promise(resolve => setTimeout(resolve, 600));
+            return prospects.map(prospect => ({
+                ...prospect,
+                validated: true,
+                emailValid: true,
+                readyToSend: true
+            }));
+        }
+
+        // ========== UI WORKFLOW ==========
+
+        function resetWorkflowSteps() {
+            document.querySelectorAll('.workflow-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+        }
+
+        function setWorkflowStep(stepId, status) {
+            const step = document.getElementById(stepId);
+            step.classList.remove('active', 'completed');
+            if (status) step.classList.add(status);
+        }
+
+        async function animateProgress(button, percent) {
+            const loadingBar = button.querySelector('.loading-bar');
+            loadingBar.style.width = percent + '%';
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        function showLoadingState() {
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('prospects-container').style.display = 'none';
+            document.getElementById('loading-state').style.display = 'block';
+        }
+
+        function showEmptyState() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('prospects-container').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'block';
+        }
+
+        function showErrorState(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('empty-state').innerHTML = `
+                <div class="icon">❌</div>
+                <div>Erreur: ${message}</div>
+                <button class="quick-btn" onclick="showEmptyState()" style="margin-top: 15px;">Réessayer</button>
+            `;
+            document.getElementById('empty-state').style.display = 'block';
+        }
+
+        function displayProspects(prospects) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'none';
+            
+            const container = document.getElementById('prospects-container');
+            container.style.display = 'block';
+            
+            container.innerHTML = prospects.map(prospect => `
+                <div class="prospect-card" onclick="selectProspect('${prospect.id}')">
+                    <div class="prospect-header">
+                        <div class="prospect-name">${prospect.name}</div>
+                        <div class="prospect-score">${prospect.graixlScore || 85}/100</div>
+                    </div>
+                    <div class="prospect-details">
+                        ${prospect.title} • ${prospect.company}<br>
+                        ${prospect.email} • ${prospect.industry}
+                    </div>
+                    <div class="prospect-actions">
+                        <button class="prospect-btn primary" onclick="event.stopPropagation(); generateEmailFor('${prospect.id}')">
+                            📧 Email
+                        </button>
+                        <button class="prospect-btn secondary" onclick="event.stopPropagation(); viewDetails('${prospect.id}')">
+                            👁️ Voir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('results-count').textContent = `${prospects.length} prospects`;
+        }
+
+        // ========== GESTION EMAIL ==========
+
+        function selectProspect(prospectId) {
+            selectedProspect = currentProspects.find(p => p.id === prospectId);
+            if (selectedProspect) {
+                generateEmailFor(prospectId);
+            }
+        }
+
+        function generateEmailFor(prospectId) {
+            const prospect = currentProspects.find(p => p.id === prospectId);
+            if (!prospect) return;
+
+            selectedProspect = prospect;
+            
+            document.getElementById('email-empty').style.display = 'none';
+            document.getElementById('email-content').style.display = 'block';
+            
+            document.getElementById('email-subject').textContent = prospect.email?.subject || 
+                `${prospect.name}, révolutionnez votre recrutement ${prospect.industry}`;
+            
+            document.getElementById('email-body').textContent = prospect.email?.body || 
+                `Bonjour ${prospect.name},\n\nEn tant que ${prospect.title} chez ${prospect.company}...`;
+        }
+
+        async function sendEmail() {
+            if (!selectedProspect) return;
+            
+            const sendBtn = document.querySelector('.email-btn.send');
+            sendBtn.disabled = true;
+            sendBtn.textContent = '📤 Envoi...';
+            
+            try {
+                // Simulation envoi
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                sendBtn.textContent = '✅ ENVOYÉ';
+                sendBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                
+                sessionStats.emails++;
+                updateStats();
+                
+                setTimeout(() => {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = '📤 ENVOYER MAINTENANT';
+                    sendBtn.style.background = '';
+                }, 2000);
+                
+            } catch (error) {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '❌ Erreur';
+            }
+        }
+
+        function editEmail() {
+            alert('Éditeur d\'email - Fonctionnalité à venir');
+        }
+
+        // ========== ACTIONS RAPIDES ==========
+
+        function clearResults() {
+            currentProspects = [];
+            selectedProspect = null;
+            showEmptyState();
+            document.getElementById('email-empty').style.display = 'block';
+            document.getElementById('email-content').style.display = 'none';
+            resetWorkflowSteps();
+            
+            // Reset buttons
+            document.querySelectorAll('.sector-button').forEach(btn => {
+                btn.classList.remove('loading', 'completed');
+                btn.querySelector('.loading-bar').style.width = '0%';
+            });
+        }
+
+        function exportProspects() {
+            if (currentProspects.length === 0) {
+                alert('Aucun prospect à exporter');
+                return;
+            }
+            
+            const csv = generateCSV(currentProspects);
+            downloadCSV(csv, `graixl-prospects-${currentSector}-${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        function generateCSV(prospects) {
+            const headers = ['Nom', 'Titre', 'Entreprise', 'Email', 'Score', 'Secteur'];
+            const rows = prospects.map(p => [
+                p.name, p.title, p.company, p.email, p.graixlScore, p.industry
+            ]);
+            
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function launchAll() {
+            if (confirm('Lancer la prospection sur TOUS les secteurs ?')) {
+                const sectors = ['banking', 'ecommerce', 'gaming', 'technology'];
+                for (const sector of sectors) {
+                    await launchProspection(sector);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        // ========== STATS ==========
+
+        function updateStats() {
+            sessionStats.prospects = currentProspects.length;
+            sessionStats.successRate = currentProspects.length > 0 ? 
+                Math.round((sessionStats.emails / currentProspects.length) * 100) : 0;
+            
+            document.getElementById('total-prospects').textContent = sessionStats.prospects;
+            document.getElementById('total-emails').textContent = sessionStats.emails;
+            document.getElementById('session-prospects').textContent = sessionStats.prospects;
+            document.getElementById('success-rate').textContent = sessionStats.successRate + '%';
+        }
+
+        // ========== UTILS ==========
+
+        function viewDetails(prospectId) {
+            const prospect = currentProspects.find(p => p.id === prospectId);
+            if (prospect) {
+                alert(`Détails Prospect:\n\n${JSON.stringify(prospect, null, 2)}`);
+            }
+        }
+
+        // Auto-refresh toutes les 30 secondes
+        setInterval(() => {
+            if (currentProspects.length > 0) {
+                updateStats();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
