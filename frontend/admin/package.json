@@ -1,0 +1,28 @@
+{
+  "name": "prospection-admin",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-admin": "^5.11.4",
+    "ra-data-simple-rest": "^5.11.4",
+    "@tiptap/react": "^3.6.5",
+    "@tiptap/starter-kit": "^3.6.5",
+    "@tiptap/extension-mention": "^3.6.5",
+    "@mui/material": "^7.3.4",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "recharts": "^3.2.1",
+    "react-beautiful-dnd": "^13.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

@@ -1,0 +1,179 @@
+// Prisma schema for prospection-system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["prospection"]
+}
+
+// Campaigns
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String
+  status    CampaignStatus @default(DRAFT)
+
+  // Target configuration
+  linkedinSearchUrl String?
+  filters           Json?  // { location, industry, companySize, jobTitle }
+  maxProspects      Int    @default(1000)
+
+  // Schedule
+  startDate         DateTime?
+  endDate           DateTime?
+  dailyLimit        Int      @default(50)
+
+  // Stats
+  prospectsScraped  Int      @default(0)
+  messagesSent      Int      @default(0)
+  responsesReceived Int      @default(0)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  prospects Prospect[]
+  messages  MessageTemplate[]
+
+  @@map("campaigns")
+  @@schema("prospection")
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  @@schema("prospection")
+}
+
+// Prospects (CRM)
+model Prospect {
+  id              String   @id @default(cuid())
+  campaignId      String?
+
+  // LinkedIn data
+  firstName       String?
+  lastName        String?
+  fullName        String
+  company         String?
+  jobTitle        String?
+  location        String?
+  linkedinUrl     String?
+  profilePicture  String?
+  bio             String?
+
+  // Contact info
+  email           String?
+  emailScore      Float?   // Validation score 0-100
+  phone           String?
+
+  // CRM fields
+  status          ProspectStatus @default(TO_CONTACT)
+  tags            String[]       // Array of tags
+  notes           String?
+  priority        Priority       @default(MEDIUM)
+
+  // Outreach tracking
+  lastContactedAt DateTime?
+  messagesSent    Int            @default(0)
+  responded       Boolean        @default(false)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  campaign        Campaign?      @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  activities      Activity[]
+
+  @@index([campaignId])
+  @@index([status])
+  @@index([email])
+  @@map("prospects")
+  @@schema("prospection")
+}
+
+enum ProspectStatus {
+  TO_CONTACT
+  CONTACTED
+  RESPONDED
+  QUALIFIED
+  CONVERTED
+  REJECTED
+  @@schema("prospection")
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  @@schema("prospection")
+}
+
+// Message Templates
+model MessageTemplate {
+  id         String   @id @default(cuid())
+  campaignId String?
+
+  type       MessageType
+  subject    String?  // For emails
+  body       String   // WYSIWYG content with variables
+  delayDays  Int      @default(0)  // Days after previous message
+
+  // A/B testing
+  variants   Json?    // Array of variant templates
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("message_templates")
+  @@schema("prospection")
+}
+
+enum MessageType {
+  FIRST_CONTACT
+  FOLLOW_UP_1
+  FOLLOW_UP_2
+  FOLLOW_UP_3
+  @@schema("prospection")
+}
+
+// Activity Log (Timeline)
+model Activity {
+  id         String   @id @default(cuid())
+  prospectId String
+
+  type       ActivityType
+  message    String
+  metadata   Json?
+
+  createdAt  DateTime @default(now())
+
+  // Relations
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@index([prospectId])
+  @@index([createdAt])
+  @@map("activities")
+  @@schema("prospection")
+}
+
+enum ActivityType {
+  NOTE
+  EMAIL_SENT
+  EMAIL_RECEIVED
+  LINKEDIN_MESSAGE
+  LINKEDIN_REPLY
+  STATUS_CHANGE
+  TAG_ADDED
+  TAG_REMOVED
+  @@schema("prospection")
+}
