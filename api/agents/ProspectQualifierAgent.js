@@ -204,8 +204,7 @@ Réponds en JSON strict:
     const response = await this.openai.chat.completions.create({
       model: this.model,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3, // Low temp for consistency
-      response_format: { type: "json_object" }
+      temperature: 0.3 // Low temp for consistency
     });
 
     const aiAnalysis = JSON.parse(response.choices[0].message.content);
