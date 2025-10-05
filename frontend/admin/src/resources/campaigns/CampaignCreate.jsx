@@ -37,11 +37,13 @@ export const CampaignCreate = () => (
           helperText="Ex: https://www.linkedin.com/search/results/people/?keywords=CTO%20startup%20Paris"
           fullWidth
         />
-        <JsonInput
+        <TextInput
           source="filters"
           label="Filtres avancés (JSON)"
           helperText='Ex: {"location": "Paris", "industry": "Tech", "companySize": "11-50"}'
+          multiline
           fullWidth
+          defaultValue="{}"
         />
         <NumberInput
           source="maxProspects"
