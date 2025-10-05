@@ -1,0 +1,13 @@
+# Test files
+test-*.js
+*.test.js
+__tests__/
+
+# Documentation
+*.md
+!README.md
+
+# Local development
+.env.local
+.env.development
+node_modules/
