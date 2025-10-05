@@ -3,27 +3,13 @@
   "builds": [
     {
       "src": "api/admin-server.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 60
-      }
-    },
-    {
-      "src": "frontend/admin/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "frontend/admin/dist"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/admin-server.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/frontend/admin/dist/$1"
+      "dest": "/api/admin-server.js"
     }
   ],
   "env": {
