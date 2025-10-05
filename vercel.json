@@ -3,7 +3,7 @@
   "name": "graixl-prospection-system",
   "builds": [
     {
-      "src": "api/server.js",
+      "src": "api/server-v3.js",
       "use": "@vercel/node"
     },
     {
@@ -14,7 +14,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/server.js"
+      "dest": "/api/server-v3.js"
     },
     {
       "src": "/(.*)",
@@ -25,8 +25,8 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "api/server.js": {
-      "maxDuration": 30
+    "api/server-v3.js": {
+      "maxDuration": 60
     }
   }
 }
