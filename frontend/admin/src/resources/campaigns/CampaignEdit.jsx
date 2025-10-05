@@ -7,7 +7,6 @@ import {
   NumberInput,
   DateInput,
   required,
-  JsonInput,
   ReferenceManyField,
   Datagrid,
   TextField,
@@ -71,7 +70,9 @@ export const CampaignEdit = () => (
 
       <FormTab label="Ciblage">
         <TextInput source="linkedinSearchUrl" label="URL de recherche LinkedIn" fullWidth />
-        <JsonInput source="filters" label="Filtres avancés (JSON)" fullWidth />
+        <TextInput source="filters" label="Filtres avancés (JSON)" multiline fullWidth format={(v) => JSON.stringify(v, null, 2)} parse={(v) => {
+          try { return JSON.parse(v); } catch { return v; }
+        }} />
         <NumberInput source="maxProspects" label="Nombre max de prospects" fullWidth />
       </FormTab>
 

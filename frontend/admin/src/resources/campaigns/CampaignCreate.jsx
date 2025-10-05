@@ -7,7 +7,6 @@ import {
   NumberInput,
   DateInput,
   required,
-  JsonInput,
 } from 'react-admin';
 
 const statusChoices = [
