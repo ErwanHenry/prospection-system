@@ -15,7 +15,7 @@ import { MessageList } from './resources/messages/MessageList';
 import { MessageEdit } from './resources/messages/MessageEdit';
 import { MessageCreate } from './resources/messages/MessageCreate';
 
-const dataProvider = simpleRestProvider('/api');
+const dataProvider = simpleRestProvider('http://localhost:3000/api');
 
 const AdminApp = () => (
   <Admin dataProvider={dataProvider} dashboard={Dashboard}>
