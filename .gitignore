@@ -2,11 +2,19 @@
 node_modules/
 */node_modules/
 
-# Environment variables
+# Environment variables - CRITICAL: Never commit these files
 .env
+.env.*
+*.env
+*.env.*
 .env.local
 .env.production
-.env.*.local
+.env.development
+.env.test
+backend/.env
+backend/.env.*
+**/.env
+**/.env.*
 
 # Logs
 logs/
