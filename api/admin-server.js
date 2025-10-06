@@ -10,8 +10,38 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.API_PORT || 3000;
 
-// Middleware
-app.use(cors());
+// Middleware - Dynamic CORS for Vercel deployments
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow patterns for Vercel deployments and localhost
+    const allowedPatterns = [
+      /^https:\/\/.*\.vercel\.app$/,  // All Vercel deployments
+      'http://localhost:3001',
+      'http://localhost:3000',
+      'http://localhost:3005'
+    ];
+
+    // Check if origin matches any allowed pattern
+    const isAllowed = allowedPatterns.some(pattern => {
+      if (typeof pattern === 'string') {
+        return origin === pattern;
+      }
+      return pattern.test(origin);
+    });
+
+    // Allow if matched or no origin (same-origin requests)
+    if (isAllowed || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Import route handlers

@@ -14,6 +14,17 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Disable source maps in production for security
+    // Manual chunks for better code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-admin'],
+          ui: ['@mui/material', '@mui/icons-material'],
+          charts: ['recharts'],
+          editor: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-mention'],
+        },
+      },
+    },
   },
 });

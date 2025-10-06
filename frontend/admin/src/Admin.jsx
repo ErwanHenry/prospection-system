@@ -15,7 +15,9 @@ import { MessageList } from './resources/messages/MessageList';
 import { MessageEdit } from './resources/messages/MessageEdit';
 import { MessageCreate } from './resources/messages/MessageCreate';
 
-const dataProvider = simpleRestProvider('http://localhost:3000/api');
+// Data provider - use production API URL or localhost for dev
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const dataProvider = simpleRestProvider(API_URL);
 
 const AdminApp = () => (
   <Admin dataProvider={dataProvider} dashboard={Dashboard}>
