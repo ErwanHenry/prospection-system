@@ -2,17 +2,27 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/admin-server.js",
+      "src": "api/production-server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/production-server.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/admin-server.js"
+      "dest": "/frontend/$1"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/frontend/campaign-dashboard.html"
+    }
+  ]
 }

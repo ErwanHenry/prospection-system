@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Dashboard - Prospection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-paused {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .results {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .results-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .results-content {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .prospect-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+
+        .prospect-item {
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .prospect-item:hover {
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .prospect-item.selected {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .prospect-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .prospect-details {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .score-high {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .score-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .score-low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .template-preview {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .template-subject {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+
+        .template-body {
+            color: #6b7280;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Campaign Dashboard</h1>
+            <p class="tagline">Prospection System - Opérationnel et Ready to Use</p>
+        </header>
+
+        <div class="grid">
+            <!-- STEP 1: Search Prospects -->
+            <div class="card">
+                <h2 class="card-title"><span class="icon">🔍</span> Step 1: Search Prospects</h2>
+
+                <div class="form-group">
+                    <label>Search Query</label>
+                    <input type="text" id="searchQuery" placeholder="CTO startup Paris" value="CTO startup Paris">
+                </div>
+
+                <div class="form-group">
+                    <label>Limit</label>
+                    <input type="number" id="searchLimit" value="20" min="1" max="100">
+                </div>
+
+                <button onclick="searchProspects()">
+                    🔎 Search Apollo.io
+                </button>
+
+                <div id="searchResults"></div>
+            </div>
+
+            <!-- STEP 2: Score & Filter -->
+            <div class="card">
+                <h2 class="card-title"><span class="icon">🎯</span> Step 2: Score & Filter (70%)</h2>
+
+                <div id="scoreSection" style="display: none;">
+                    <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
+                        Score prospects with AI and keep only qualified (≥70/100)
+                    </p>
+
+                    <button onclick="scoreProspects()">
+                        ⚡ Score with AI
+                    </button>
+
+                    <div id="scoreResults"></div>
+                </div>
+
+                <div id="scoreEmpty" style="text-align: center; padding: 40px; color: #9ca3af;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">🎯</div>
+                    <p>Search prospects first</p>
+                </div>
+            </div>
+
+            <!-- STEP 3: Create Campaign -->
+            <div class="card">
+                <h2 class="card-title"><span class="icon">📋</span> Step 3: Create Campaign</h2>
+
+                <div id="campaignSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Campaign Name</label>
+                        <input type="text" id="campaignName" placeholder="Q1 2025 - CTOs Paris">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message Template</label>
+                        <select id="templateSelect" onchange="previewTemplate()">
+                            <option value="data-surprise">💰 Data Surprise</option>
+                            <option value="meta-confession">🤖 Meta Confession</option>
+                            <option value="reverse-pitch">🔄 Reverse Pitch</option>
+                            <option value="proof-point">✅ Proof Point</option>
+                            <option value="industry-insight">📊 Industry Insight</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Touches</label>
+                        <input type="number" id="touches" value="5" min="1" max="10">
+                    </div>
+
+                    <button onclick="createCampaign()">
+                        🚀 Create & Launch Campaign
+                    </button>
+
+                    <div id="templatePreview"></div>
+                    <div id="campaignResults"></div>
+                </div>
+
+                <div id="campaignEmpty" style="text-align: center; padding: 40px; color: #9ca3af;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📋</div>
+                    <p>Score prospects first</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let allProspects = [];
+        let qualifiedProspects = [];
+
+        // Search prospects
+        async function searchProspects() {
+            const query = document.getElementById('searchQuery').value;
+            const limit = parseInt(document.getElementById('searchLimit').value);
+
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching Apollo.io...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/prospects/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, limit })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    allProspects = data.prospects;
+
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ Found ${data.count} prospects
+                        </div>
+                        <div class="prospect-list">
+                            ${data.prospects.map(p => `
+                                <div class="prospect-item">
+                                    <div class="prospect-name">${p.name}</div>
+                                    <div class="prospect-details">
+                                        ${p.title} @ ${p.company}<br>
+                                        📍 ${p.location || 'Unknown'}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    // Show score section
+                    document.getElementById('scoreEmpty').style.display = 'none';
+                    document.getElementById('scoreSection').style.display = 'block';
+
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-error">
+                            ❌ ${data.error || 'Search failed'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Score prospects
+        async function scoreProspects() {
+            if (allProspects.length === 0) {
+                alert('No prospects to score');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('scoreResults');
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Scoring with AI...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/prospects/score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prospects: allProspects })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    qualifiedProspects = data.prospects.qualified;
+
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ Qualified: ${data.qualified}/${data.total} (${100 - data.rejectionRate}%)<br>
+                            ❌ Rejected: ${data.rejected}/${data.total} (${data.rejectionRate}%)
+                        </div>
+                        <div class="prospect-list">
+                            ${qualifiedProspects.map(p => `
+                                <div class="prospect-item">
+                                    <div class="prospect-name">
+                                        ${p.name}
+                                        <span class="score ${getScoreClass(p.score)}">
+                                            ${p.score}/100
+                                        </span>
+                                    </div>
+                                    <div class="prospect-details">
+                                        ${p.title} @ ${p.company}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    // Show campaign section
+                    document.getElementById('campaignEmpty').style.display = 'none';
+                    document.getElementById('campaignSection').style.display = 'block';
+
+                    // Set default campaign name
+                    const query = document.getElementById('searchQuery').value;
+                    document.getElementById('campaignName').value = `${query} - ${new Date().toLocaleDateString()}`;
+
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-error">
+                            ❌ ${data.error || 'Scoring failed'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Create campaign
+        async function createCampaign() {
+            const name = document.getElementById('campaignName').value;
+            const template = document.getElementById('templateSelect').value;
+            const touches = parseInt(document.getElementById('touches').value);
+
+            if (!name) {
+                alert('Please enter a campaign name');
+                return;
+            }
+
+            if (qualifiedProspects.length === 0) {
+                alert('No qualified prospects');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('campaignResults');
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Creating campaign...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/campaigns/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        prospects: qualifiedProspects,
+                        template,
+                        touches,
+                        delays: [0, 3, 7, 14, 21]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            🎉 Campaign created successfully!
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${data.campaign.prospects}</div>
+                                <div class="stat-label">Prospects</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.campaign.touches}</div>
+                                <div class="stat-label">Touches</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.sheetsResult.added}</div>
+                                <div class="stat-label">In CRM</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.sheetsResult.duplicatesSkipped || 0}</div>
+                                <div class="stat-label">Skipped</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">✅</div>
+                                <div class="stat-label">Active</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <p style="font-size: 13px; color: #6b7280;">
+                                <strong>Campaign ID:</strong> ${data.campaign.id}<br>
+                                <strong>Template:</strong> ${template}<br>
+                                <strong>Next Touch:</strong> Touch 1 (now)
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-error">
+                            ❌ ${data.error || 'Campaign creation failed'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Preview template
+        function previewTemplate() {
+            const template = document.getElementById('templateSelect').value;
+            const previewDiv = document.getElementById('templatePreview');
+
+            const templates = {
+                'data-surprise': {
+                    subject: 'Les maths de votre équipe sales',
+                    body: '5 SDRs × 45K€ = 225K€\n1 IA Graixl = 24K€\n\nMême résultats. 90% d\'économie.'
+                },
+                'meta-confession': {
+                    subject: 'Confession meta',
+                    body: 'Mon IA a scanné 2,847 profils LinkedIn.\nVous: score 91/100.\n\nC\'est ce que Graixl fait pour mes clients.'
+                },
+                'reverse-pitch': {
+                    subject: 'Je ne veux PAS vous vendre',
+                    body: 'Pas maintenant.\n\nJe veux juste vous MONTRER comment mon IA a trouvé votre profil.'
+                },
+                'proof-point': {
+                    subject: '10 demos/mois garantis',
+                    body: 'Graixl génère 10 demos/mois ou remboursé.\n\nProof: 12 clients satisfaits.'
+                },
+                'industry-insight': {
+                    subject: 'Pattern détecté',
+                    body: '70% des SaaS perdent du temps sur des leads pourris.\n\nGraixl résout ça avec IA.'
+                }
+            };
+
+            const preview = templates[template];
+
+            previewDiv.innerHTML = `
+                <div class="template-preview">
+                    <div class="template-subject">📧 ${preview.subject}</div>
+                    <div class="template-body">${preview.body}</div>
+                </div>
+            `;
+        }
+
+        // Helper function
+        function getScoreClass(score) {
+            if (score >= 85) return 'score-high';
+            if (score >= 70) return 'score-medium';
+            return 'score-low';
+        }
+
+        // Initialize
+        window.onload = function() {
+            console.log('Campaign Dashboard loaded');
+            previewTemplate();
+        };
+    </script>
+</body>
+</html>
